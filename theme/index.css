@@ -4,11 +4,11 @@ html:root {
   --rp-c-brand-dark: #176bc0;
   --rp-c-brand-darker: #1258a0;
   --rp-c-brand-tint: #2383e210;
-  --rp-content-max-width: 960px;
-  --rp-content-padding-x: 48px;
-  --rp-content-padding-y: 40px;
-  --rp-sidebar-width: 252px;
-  --rp-outline-width: 216px;
+  --rp-content-max-width: 900px;
+  --rp-content-padding-x: 40px;
+  --rp-content-padding-y: 24px;
+  --rp-sidebar-width: 280px;
+  --rp-outline-width: 260px;
   --rp-radius: 10px;
   --rp-radius-small: 6px;
 }
@@ -67,14 +67,20 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC'
 .rp-doc .notebook-footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--rp-c-divider-light); font-size: 12px; color: var(--rp-c-text-2); }
 a:focus-visible, button:focus-visible { outline: 2px solid var(--rp-c-brand); outline-offset: 4px; }
 @media (min-width: 1280px) {
-  .rp-doc-layout__container { width: 94%; max-width: 1560px; margin-inline: auto; }
-  .rp-doc-layout__sidebar { margin-left: 0; }
-  .rp-doc-layout__doc { max-width: none; min-width: 0; }
-  .rp-doc-layout__outline { margin-right: 0; }
-  .rp-nav { --rp-nav-padding-x: 3vw; }
+  /* Match Halo's fluid columns. Keep higher specificity than the default
+     theme, which can be emitted after this stylesheet in production. */
+  html:root {
+    --rp-sidebar-margin-left: 0px;
+    --rp-outline-margin-right: 0px;
+  }
+  html .rp-doc-layout__container { width: 90%; max-width: none; margin-inline: auto; }
+  html .rp-doc-layout__sidebar { margin-left: 0; flex-shrink: 0; }
+  html .rp-doc-layout__doc { max-width: none; min-width: 0; flex: 1; }
+  html .rp-doc-layout__outline { margin-right: 0; flex-shrink: 0; }
+  html .rp-nav { --rp-nav-padding-x: calc(5vw + var(--rp-sidebar-padding)); }
 }
 @media (max-width: 1279px) {
-  html:root { --rp-content-padding-x: 32px; --rp-content-padding-y: 32px; }
+  html:root { --rp-content-padding-x: 20px; --rp-content-padding-y: 36px; }
 }
 @media (max-width: 960px) and (min-width: 769px) { .topic-grid { grid-template-columns: 1fr; } }
 @media (max-width: 640px) {
