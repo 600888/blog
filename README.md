@@ -1,4 +1,4 @@
-# 东宇的学习笔记
+# 陈东宇的博客
 
 使用 Rspress 2 构建的个人博客，记录数据结构与算法、计算机网络、操作系统和电力规约。文档布局参考 [Halo 文档](https://docs.halo.run/guide/install/)。
 
@@ -49,7 +49,7 @@ rspress.config.ts       站点、导航及侧边栏配置
 3. 在 **Settings → Pages → Build and deployment** 中选择 **Deploy from a branch**。
 4. 选择 **gh-pages / (root)** 并保存。
 
-部署完成后访问：**https://600888.github.io/blog/**。
+部署完成后访问：[https://600888.github.io/blog/](https://600888.github.io/blog/)。
 
 以后更新文章只需推送 `main`。也可在 Actions 手动运行工作流。工作流使用自动提供的 `GITHUB_TOKEN`，不需要配置个人 Token。
 

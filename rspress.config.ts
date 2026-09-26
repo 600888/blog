@@ -1,4 +1,5 @@
 import { defineConfig } from '@rspress/core';
+import { slidingWindowSidebar } from './sliding-window-sidebar';
 
 const sections = [
   { text: '数据结构与算法', path: 'algorithms', articles: [['complexity', '时间与空间复杂度'], ['linear-structures', '数组、链表、栈与队列']] },
@@ -11,12 +12,12 @@ export default defineConfig({
   root: 'docs',
   base: '/blog/',
   siteOrigin: 'https://600888.github.io',
-  title: '东宇的学习笔记',
+  title: '陈东宇的博客',
   description: '记录计算机基础与电力通信的学习过程：数据结构与算法、计算机网络、操作系统、电力规约。',
   lang: 'zh',
   icon: '/logo.svg',
   logo: '/logo.svg',
-  logoText: '东宇的学习笔记',
+  logoText: '陈东宇的博客',
   route: { cleanUrls: true },
   themeConfig: {
     darkMode: 'light',
@@ -38,6 +39,7 @@ export default defineConfig({
           { sectionHeaderText: text },
           { text: '模块导读', link: `/${path}/` },
           { text: '基础笔记', collapsible: true, collapsed: false, items: articles.map(([slug, label]) => ({ text: label, link: `/${path}/${slug}` })) },
+          ...(path === 'algorithms' ? slidingWindowSidebar : []),
         ],
       ])),
     },

@@ -70,14 +70,15 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--rp-c-brand); ou
   /* Match Halo's fluid columns. Keep higher specificity than the default
      theme, which can be emitted after this stylesheet in production. */
   html:root {
+    --rp-sidebar-width: 360px;
     --rp-sidebar-margin-left: 0px;
     --rp-outline-margin-right: 0px;
   }
-  html .rp-doc-layout__container { width: 90%; max-width: none; margin-inline: auto; }
+  html .rp-doc-layout__container { width: 96%; max-width: none; margin-inline: auto; }
   html .rp-doc-layout__sidebar { margin-left: 0; flex-shrink: 0; }
   html .rp-doc-layout__doc { max-width: none; min-width: 0; flex: 1; }
   html .rp-doc-layout__outline { margin-right: 0; flex-shrink: 0; }
-  html .rp-nav { --rp-nav-padding-x: calc(5vw + var(--rp-sidebar-padding)); }
+  html .rp-nav { --rp-nav-padding-x: calc(2vw + var(--rp-sidebar-padding)); }
 }
 @media (max-width: 1279px) {
   html:root { --rp-content-padding-x: 20px; --rp-content-padding-y: 36px; }

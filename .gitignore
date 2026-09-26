@@ -147,3 +147,5 @@ doc_build/
 .rspress/
 .npm/
 .qa/
+
+.workbuddy/
