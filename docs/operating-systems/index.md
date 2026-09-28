@@ -1,6 +1,7 @@
 ---
 title: 操作系统
 description: 从进程、线程和虚拟内存理解程序的运行环境。
+comments: false
 ---
 
 # 操作系统

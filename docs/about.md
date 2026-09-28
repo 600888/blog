@@ -1,6 +1,7 @@
 ---
 title: 关于这些笔记
 description: 这份博客的内容范围与阅读方式。
+comments: false
 ---
 
 # 关于这些笔记

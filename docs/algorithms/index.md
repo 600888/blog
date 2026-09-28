@@ -1,6 +1,7 @@
 ---
 title: 数据结构与算法
 description: 从复杂度和线性结构开始，建立数据结构与算法的基础。
+comments: false
 ---
 
 # 数据结构与算法
@@ -27,4 +28,4 @@ description: 从复杂度和线性结构开始，建立数据结构与算法的�
 
 ## 后续方向
 
-在线性结构之后，可以继续学习树与图、查找与排序，以及递归、贪心和动态规划。相关笔记将逐步补充。
+在线性结构之后，可以练习[数据结构题单](./data-structures/index.md)、[滑动窗口专题](./sliding-window/index.md)和[动态规划专题](./dynamic-programming/index.md)。图论、查找与排序、递归和贪心等笔记将逐步补充。

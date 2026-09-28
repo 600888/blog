@@ -1,6 +1,7 @@
 ---
 title: 电力规约
 description: 从原始报文到业务含义，整理电力通信的阅读与联调方法。
+comments: false
 ---
 
 # 电力规约
