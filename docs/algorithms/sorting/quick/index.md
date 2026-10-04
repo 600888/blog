@@ -24,31 +24,37 @@ description: 随机枢轴、三路划分与快速选择，包含过程演示、C
 | 分别处理两侧 | [1,2] / [3] / [4,5] |
 | 结果 | [1,2,3,4,5] |
 
+## 图解
+
+![快速排序图解：以 3 为枢轴的一次三路划分把数组分成小于、等于、大于三段，两侧递归后拼接，底部为三路划分不变量](./images/quick-sort.drawio.png)
+
 ## C++17 实现模板
 
 函数接收整数数组并修改其结果。使用 int 下标的模板约定元素数不超过 INT_MAX。本专题的整数键按常见的 32 位 int 讨论；稳定性指比较相同键时，附属记录仍保持原相对顺序。
 
 ```cpp
-#include <random>
-#include <utility>
+#include <random>    // std::mt19937、std::uniform_int_distribution
+#include <utility>   // std::swap
 #include <vector>
 
 void quickSort(std::vector<int>& a) {
-    std::mt19937 rng(std::random_device{}());
+    std::mt19937 rng(std::random_device{}());  // 随机源：打散输入模式，避免固定枢轴被构造退化
+    // 处理区间 [l, r)；只有较小的一侧递归，较大的一侧留在 while 里继续，栈深保证 O(log n)。
     auto solve = [&](auto&& self, int l, int r) -> void {
-        while (r - l > 1) {
+        while (r - l > 1) {                    // 区间长度不超过 1 时天然有序
             std::uniform_int_distribution<int> pick(l, r - 1);
-            const int pivot = a[pick(rng)];
+            const int pivot = a[pick(rng)];    // 关键：保存枢轴的值；若记录下标，随后的交换会让它失效
+            // 三路划分不变量：[l, lt) < pivot；[lt, i) = pivot；[i, gt) 未检查；[gt, r) > pivot。
             int lt = l, i = l, gt = r;
             while (i < gt) {
-                if (a[i] < pivot) std::swap(a[lt++], a[i++]);
-                else if (a[i] > pivot) std::swap(a[i], a[--gt]);
-                else ++i;
+                if (a[i] < pivot) std::swap(a[lt++], a[i++]);    // 换到等值区左端，换来的元素已检查，i 前进
+                else if (a[i] > pivot) std::swap(a[i], a[--gt]); // 换来的是未检查元素，i 不动
+                else ++i;                                        // 等于枢轴：扩入等值区
             }
-            // 只递归较小的一侧，较大的一侧在循环中处理。
+            // 等值区间 [lt, gt) 已全部就位，无需参与递归。
             if (lt - l < r - gt) {
-                self(self, l, lt);
-                l = gt;
+                self(self, l, lt);               // 只递归较小的一侧
+                l = gt;                          // 较大的一侧交给 while 继续处理
             } else {
                 self(self, gt, r);
                 r = lt;

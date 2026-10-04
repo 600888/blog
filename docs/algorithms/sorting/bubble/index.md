@@ -25,25 +25,30 @@ description: 相邻交换、有序后缀与提前结束，包含过程演示、C
 | 第三轮，3 就位 | [1,2,3,4,5] |
 | 第四轮，无交换 | 提前结束 |
 
+## 图解
+
+![冒泡排序图解：第 1 到第 4 轮的相邻比较与交换，红色圆圈为交换、灰色圆圈为仅比较，绿色为已就位元素](./images/bubble-sort.drawio.png)
+
 ## C++17 实现模板
 
 函数接收整数数组并修改其结果。使用 int 下标的模板约定元素数不超过 INT_MAX。本专题的整数键按常见的 32 位 int 讨论；稳定性指比较相同键时，附属记录仍保持原相对顺序。
 
 ```cpp
-#include <utility>
+#include <utility>  // std::swap
 #include <vector>
 
 void bubbleSort(std::vector<int>& a) {
-    const int n = static_cast<int>(a.size());
+    const int n = static_cast<int>(a.size());  // 元素个数；空数组时循环自然不执行
+    // end 是未排序区间的右边界（不含 end）。每完成一轮，区间最大值落在 end - 1，边界左移一格。
     for (int end = n; end > 1; --end) {
-        bool changed = false;
-        for (int j = 1; j < end; ++j) {
-            if (a[j - 1] > a[j]) {
-                std::swap(a[j - 1], a[j]);
+        bool changed = false;                  // 每轮开始都要重置：记录本轮是否发生过交换
+        for (int j = 1; j < end; ++j) {        // 内层只扫到 end - 1，访问 a[j - 1]、a[j] 不会越界
+            if (a[j - 1] > a[j]) {             // 严格大于才交换：相等元素不越过彼此，这是稳定性的来源
+                std::swap(a[j - 1], a[j]);     // 把较大的元素向右冒泡一格
                 changed = true;
             }
         }
-        if (!changed) break;
+        if (!changed) break;                   // 整轮无交换说明已完全有序，提前结束
     }
 }
 ```

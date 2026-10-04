@@ -23,6 +23,10 @@ description: 增量分组与组内插入，包含过程演示、C++17 模板、�
 | gap = 2：下标 0、2、4 组变为 2、4、5；1、3 组变为 1、3 | [2,1,4,3,5] |
 | gap = 1：普通插入排序 | [1,2,3,4,5] |
 
+## 图解
+
+![希尔排序图解：gap = 2 时下标 0、2、4 与 1、3 各成一组做组内插入排序，gap = 1 完成最终排序](./images/shell-sort.drawio.png)
+
 ## C++17 实现模板
 
 函数接收整数数组并修改其结果。使用 int 下标的模板约定元素数不超过 INT_MAX。本专题的整数键按常见的 32 位 int 讨论；稳定性指比较相同键时，附属记录仍保持原相对顺序。
@@ -32,15 +36,17 @@ description: 增量分组与组内插入，包含过程演示、C++17 模板、�
 
 void shellSort(std::vector<int>& a) {
     const int n = static_cast<int>(a.size());
+    // 外层：增量序列 n/2, n/4, ..., 1。gap = 1 那一轮就是普通插入排序，保证整体有序。
     for (int gap = n / 2; gap > 0; gap /= 2) {
-        for (int i = gap; i < n; ++i) {
-            const int key = a[i];
-            int j = i;
-            while (j >= gap && a[j - gap] > key) {
-                a[j] = a[j - gap];
-                j -= gap;
+        // 内层：对每个下标 i，把它插入到“下标模 gap 同组”的有序子序列里。
+        for (int i = gap; i < n; ++i) {        // i 是各分组里从第二个元素开始的对象
+            const int key = a[i];              // 先暂存，防止组内右移时被覆盖
+            int j = i;                         // j：key 在组内的候选位置
+            while (j >= gap && a[j - gap] > key) { // 与同组前一个元素比较；j >= gap 才能访问 a[j - gap]
+                a[j] = a[j - gap];             // 组内元素按步长 gap 右移
+                j -= gap;                      // 在同一组内向左跨一步（不是 --j）
             }
-            a[j] = key;
+            a[j] = key;                        // 插入到组内的正确位置
         }
     }
 }

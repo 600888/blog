@@ -1,0 +1,133 @@
+<mxfile host="app.diagrams.net" agent="WorkBuddy" version="24.7.7">
+  <diagram id="counting-sort" name="计数排序图解">
+    <mxGraphModel dx="880" dy="520" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="880" pageHeight="490" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="计数排序图解：统计频次 → 前缀和 → 从右向左稳定回填（输入 [-1,2,-1,0]）" style="text;html=1;align=left;verticalAlign=middle;fontSize=17;fontStyle=1;fontColor=#1a1a1a;" vertex="1" parent="1">
+          <mxGeometry x="10" y="12" width="850" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="r0e0" value="-1" style="rounded=0;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=15;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="170" y="80" width="44" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="r0e1" value="2" style="rounded=0;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=15;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="230" y="80" width="44" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="r0e2" value="-1" style="rounded=0;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=15;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="290" y="80" width="44" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="r0e3" value="0" style="rounded=0;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=15;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="350" y="80" width="44" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="L0" value="输入" style="text;html=1;align=left;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="40" y="82" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ann0" value="最小值 low = -1 作偏移：key = x − low；值域 K = 2 − (−1) + 1 = 4" style="text;html=1;align=left;verticalAlign=middle;fontSize=13;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="430" y="86" width="440" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ar1" value="" style="edgeStyle=none;strokeColor=#999999;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="282" y="128" as="sourcePoint" />
+            <mxPoint x="282" y="156" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ar1t" value="① 统计频次 count[x − low]" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="300" y="128" width="260" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="r1e0" value="2" style="rounded=0;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=15;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="170" y="160" width="44" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="r1e1" value="1" style="rounded=0;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=15;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="230" y="160" width="44" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="r1e2" value="0" style="rounded=0;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=15;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="290" y="160" width="44" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="r1e3" value="1" style="rounded=0;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=15;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="350" y="160" width="44" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="v0" value="值 -1" style="text;html=1;align=center;verticalAlign=middle;fontSize=11;fontColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="165" y="206" width="54" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="v1" value="值 0" style="text;html=1;align=center;verticalAlign=middle;fontSize=11;fontColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="225" y="206" width="54" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="v2" value="值 1" style="text;html=1;align=center;verticalAlign=middle;fontSize=11;fontColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="285" y="206" width="54" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="v3" value="值 2" style="text;html=1;align=center;verticalAlign=middle;fontSize=11;fontColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="345" y="206" width="54" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="L1" value="频次" style="text;html=1;align=left;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="40" y="162" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ann1" value="每个盒子下方标注它对应的值" style="text;html=1;align=left;verticalAlign=middle;fontSize=13;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="430" y="166" width="440" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ar2" value="" style="edgeStyle=none;strokeColor=#999999;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="282" y="226" as="sourcePoint" />
+            <mxPoint x="282" y="254" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ar2t" value="② 前缀和：count[i] += count[i − 1]" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="300" y="226" width="300" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="r2e0" value="2" style="rounded=0;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=15;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="170" y="258" width="44" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="r2e1" value="3" style="rounded=0;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=15;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="230" y="258" width="44" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="r2e2" value="3" style="rounded=0;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=15;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="290" y="258" width="44" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="r2e3" value="4" style="rounded=0;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=15;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="350" y="258" width="44" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="L2" value="累计" style="text;html=1;align=left;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="40" y="260" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ann2" value="count[t] = 值 ≤ 第 t 档的元素个数" style="text;html=1;align=left;verticalAlign=middle;fontSize=13;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="430" y="264" width="440" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ar3" value="" style="edgeStyle=none;strokeColor=#999999;strokeWidth=1.5;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="282" y="306" as="sourcePoint" />
+            <mxPoint x="282" y="334" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ar3t" value="③ 从右向左回填：output[--count[key]] = x" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="300" y="306" width="320" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="r3e0" value="-1" style="rounded=0;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=15;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="170" y="338" width="44" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="r3e1" value="-1" style="rounded=0;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=15;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="230" y="338" width="44" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="r3e2" value="0" style="rounded=0;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=15;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="290" y="338" width="44" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="r3e3" value="2" style="rounded=0;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=15;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="350" y="338" width="44" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="L3" value="输出" style="text;html=1;align=left;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="40" y="340" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ann3" value="从右向左：靠后的相同值占靠后的位置 → 稳定" style="text;html=1;align=left;verticalAlign=middle;fontSize=13;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="430" y="342" width="440" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="note1" value="时间 O(n + K)，额外空间 O(n + K)；K 过大时内存不可接受，本模板限制 K ≤ 2 000 000（可按场景调整的资源策略）。" style="text;html=1;align=left;verticalAlign=middle;fontSize=13;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="40" y="420" width="800" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="lg1" value="" style="rounded=0;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="40" y="452" width="24" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="lg1t" value="计数桶（下标 = 值 − low）" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="70" y="448" width="200" height="24" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

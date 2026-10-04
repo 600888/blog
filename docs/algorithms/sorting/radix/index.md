@@ -24,33 +24,39 @@ description: 低位优先、逐位稳定计数与有符号整数，包含过程�
 | 第二字节排序，保留同字节内原顺序 | [1,2,257,300] |
 | 第三、第四字节继续稳定排序 | [1,2,257,300] |
 
+## 图解
+
+![基数排序图解：按字节从低到高逐轮稳定计数排序，每轮同 key 元素保持原顺序，低位顺序被高位轮次保留](./images/radix-sort.drawio.png)
+
 ## C++17 实现模板
 
 函数接收整数数组并修改其结果。计数与输出下标使用 std::size_t。本专题的整数键按常见的 32 位 int 讨论；稳定性指比较相同键时，附属记录仍保持原相对顺序。
 
 ```cpp
 #include <array>
-#include <cstddef>
-#include <cstdint>
+#include <cstddef>     // std::size_t
+#include <cstdint>     // std::uint32_t
 #include <limits>
 #include <vector>
 
 void radixSort(std::vector<int>& a) {
-    static_assert(std::numeric_limits<int>::digits == 31, "requires 32-bit int");
-    std::vector<int> output(a.size());
-    for (int shift = 0; shift < 32; shift += 8) {
-        std::array<std::size_t, 256> count{};
+    static_assert(std::numeric_limits<int>::digits == 31, "requires 32-bit int"); // 本模板按 4 轮、每轮 8 位分析
+    std::vector<int> output(a.size());            // 每轮的稳定输出缓冲，与 a 交替使用
+    for (int shift = 0; shift < 32; shift += 8) { // 依次处理字节 0、1、2、3（低位优先 LSD）
+        std::array<std::size_t, 256> count{};     // 256 个计数桶，覆盖一个字节的全部取值
         auto digit = [shift](int x) -> std::size_t {
+            // 异或最高位：负数（符号位 1）映射到小键，非负数映射到大键，
+            // 无符号键的顺序就与有符号 int 的顺序一致。
             const std::uint32_t key = static_cast<std::uint32_t>(x) ^ 0x80000000u;
-            return (key >> shift) & 255u;
+            return (key >> shift) & 255u;         // 取从第 shift 位起的 8 位作为本轮键
         };
-        for (int x : a) ++count[digit(x)];
-        for (std::size_t i = 1; i < count.size(); ++i) count[i] += count[i - 1];
-        for (std::size_t i = a.size(); i > 0; --i) {
+        for (int x : a) ++count[digit(x)];        // ① 统计本字节各取值的频次
+        for (std::size_t i = 1; i < count.size(); ++i) count[i] += count[i - 1]; // ② 前缀和
+        for (std::size_t i = a.size(); i > 0; --i) { // ③ 从右向左回填：相同字节保持原有顺序（稳定）
             const int x = a[i - 1];
             output[--count[digit(x)]] = x;
         }
-        a.swap(output);
+        a.swap(output);                           // O(1) 交换；下轮会覆盖 output 全部位置，四轮共用这组数组
     }
 }
 ```

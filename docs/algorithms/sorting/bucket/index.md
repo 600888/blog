@@ -24,43 +24,47 @@ description: 有序分桶、桶内排序与分布假设，包含过程演示、C
 | 桶内稳定插入排序 | 桶 0：[1,2]；桶 3：[6,7]；桶 4：[8] |
 | 按桶号拼接 | [1,2,6,7,8] |
 
+## 图解
+
+![桶排序图解：值域 [1,8] 按桶号公式分成 5 个桶，空桶跳过，桶内插入排序后按桶号拼接](./images/bucket-sort.drawio.png)
+
 ## C++17 实现模板
 
 函数接收整数数组并修改其结果。使用 int 下标的模板约定元素数不超过 INT_MAX。本专题的整数键按常见的 32 位 int 讨论；稳定性指比较相同键时，附属记录仍保持原相对顺序。
 
 ```cpp
-#include <algorithm>
-#include <climits>
-#include <cstddef>
-#include <stdexcept>
+#include <algorithm>   // std::minmax_element
+#include <climits>     // INT_MAX
+#include <cstddef>     // std::size_t
+#include <stdexcept>   // std::length_error
 #include <vector>
 
 void bucketSort(std::vector<int>& a) {
-    if (a.size() < 2) return;
+    if (a.size() < 2) return;                     // 0 或 1 个元素天然有序
     if (a.size() > static_cast<std::size_t>(INT_MAX))
-        throw std::length_error("too many elements for this template");
+        throw std::length_error("too many elements for this template"); // 本模板用 int 下标，元素数不能超过 INT_MAX
     const int n = static_cast<int>(a.size());
     const auto bounds = std::minmax_element(a.begin(), a.end());
-    const long long low = *bounds.first;
-    const long long span = static_cast<long long>(*bounds.second) - low + 1;
-    std::vector<std::vector<int>> buckets(n);
+    const long long low = *bounds.first;          // 值域下界
+    const long long span = static_cast<long long>(*bounds.second) - low + 1; // 值域宽度；先转 long long 再相减防溢出
+    std::vector<std::vector<int>> buckets(n);     // 桶数取 n：均匀分布时每桶期望约 1 个元素
     for (int x : a) {
-        // 32 位 int 且 n <= INT_MAX 时，该乘积可用 long long 表示。
+        // 桶号映射 floor((x - low) * n / span)，落在 [0, n - 1]；n ≤ INT_MAX 时乘积在 long long 内不会溢出。
         const int id = static_cast<int>((static_cast<long long>(x) - low) * n / span);
-        buckets[id].push_back(x);
+        buckets[id].push_back(x);                 // 按输入顺序追加，保留桶内原有相对顺序
     }
-    std::size_t out = 0;
-    for (auto& bucket : buckets) {
-        for (std::size_t i = 1; i < bucket.size(); ++i) {
+    std::size_t out = 0;                          // 拼接时的全局写入位置
+    for (auto& bucket : buckets) {                // 按桶号从小到大处理，保证桶间有序
+        for (std::size_t i = 1; i < bucket.size(); ++i) { // 桶内稳定插入排序
             const int key = bucket[i];
             std::size_t j = i;
-            while (j > 0 && bucket[j - 1] > key) {
+            while (j > 0 && bucket[j - 1] > key) { // 严格大于才右移：相等不越位，桶内保持稳定
                 bucket[j] = bucket[j - 1];
                 --j;
             }
             bucket[j] = key;
         }
-        for (int x : bucket) a[out++] = x;
+        for (int x : bucket) a[out++] = x;        // 排好一个桶就紧接着写入一个桶
     }
 }
 ```

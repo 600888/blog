@@ -25,30 +25,37 @@ description: 自底向上建堆、下沉与 Top K，包含过程演示、C++17 �
 | 取出 3，恢复堆 | [2,1] / [3,4,5] |
 | 取出 2 | [1,2,3,4,5] |
 
+## 图解
+
+![堆排序图解：数组视作完全二叉树，堆顶 5 与末尾交换后进入有序后缀，新堆顶下沉恢复最大堆](./images/heap-sort.drawio.png)
+
 ## C++17 实现模板
 
 函数接收整数数组并修改其结果。使用 int 下标的模板约定元素数不超过 INT_MAX。本专题的整数键按常见的 32 位 int 讨论；稳定性指比较相同键时，附属记录仍保持原相对顺序。
 
 ```cpp
-#include <utility>
+#include <utility>  // std::swap
 #include <vector>
 
 void heapSort(std::vector<int>& a) {
     const int n = static_cast<int>(a.size());
+    // 下沉：把 a[root] 调整到堆 [0, size) 内的正确位置。
     auto siftDown = [&](int root, int size) {
-        // 非叶节点为 [0, size / 2)，先判定再计算孩子下标。
+        // 非叶节点下标为 [0, size / 2)；叶节点没有孩子，无需下沉。
         while (root < size / 2) {
-            int child = root * 2 + 1;
-            if (child + 1 < size && a[child + 1] > a[child]) ++child;
-            if (a[root] >= a[child]) break;
-            std::swap(a[root], a[child]);
+            int child = root * 2 + 1;                                // 左孩子下标 2i + 1
+            if (child + 1 < size && a[child + 1] > a[child]) ++child; // 右孩子存在且更大时选右孩子
+            if (a[root] >= a[child]) break;                          // 已满足最大堆性质，提前结束
+            std::swap(a[root], a[child]);                            // 与较大的孩子交换，继续向下检查
             root = child;
         }
     };
+    // 建堆：从最后一个非叶节点 i = n/2 - 1 倒序下沉，整体 O(n)。
     for (int i = n / 2; i > 0; --i) siftDown(i - 1, n);
+    // 排序：不变量 [0, end) 是最大堆，[end, n) 是已就位的升序后缀。
     for (int end = n; end > 1;) {
-        std::swap(a[0], a[--end]);
-        siftDown(0, end);
+        std::swap(a[0], a[--end]);               // 堆顶（当前最大值）换到后缀末端，同时堆缩小 1
+        siftDown(0, end);                        // 新堆顶下沉，恢复 [0, end) 的最大堆性质
     }
 }
 ```

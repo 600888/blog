@@ -24,6 +24,10 @@ description: 分治、稳定合并与跨区间统计，包含过程演示、C++1
 | 右半区排序 | [1,2,4] |
 | 比较两个区间头部并依次取出 | 1 → 2 → 3 → 4 → 5 |
 
+## 图解
+
+![归并排序图解：上半部分自顶向下中点拆分，下半部分自底向上稳定合并，绿色为合并产物](./images/merge-sort.drawio.png)
+
 ## C++17 实现模板
 
 函数接收整数数组并修改其结果。使用 int 下标的模板约定元素数不超过 INT_MAX。本专题的整数键按常见的 32 位 int 讨论；稳定性指比较相同键时，附属记录仍保持原相对顺序。
@@ -33,21 +37,23 @@ description: 分治、稳定合并与跨区间统计，包含过程演示、C++1
 
 void mergeSort(std::vector<int>& a) {
     const int n = static_cast<int>(a.size());
-    std::vector<int> temp(a.size());
+    std::vector<int> temp(a.size());           // 辅助数组只分配一次，各层递归复用
+    // 递归排序左闭右开区间 [l, r)；长度不超过 1 时天然有序。
     auto solve = [&](auto&& self, int l, int r) -> void {
         if (r - l <= 1) return;
-        const int mid = l + (r - l) / 2;
-        self(self, l, mid);
-        self(self, mid, r);
+        const int mid = l + (r - l) / 2;       // 中点写成 l + (r - l) / 2，避免大下标相加溢出
+        self(self, l, mid);                    // 先排好左半 [l, mid)
+        self(self, mid, r);                    // 再排好右半 [mid, r)
+        // 合并：i 扫左半，j 扫右半，k 指向 temp 的写入位置。
         int i = l, j = mid, k = l;
         while (i < mid && j < r) {
-            // 相等时先取左边，保持原先的相对顺序。
+            // 相等时先取左边：相同值保持原有相对顺序，这是稳定性的来源。
             if (a[i] <= a[j]) temp[k++] = a[i++];
             else temp[k++] = a[j++];
         }
-        while (i < mid) temp[k++] = a[i++];
+        while (i < mid) temp[k++] = a[i++];    // 两侧之一必已取空，把另一侧的剩余元素依次追加
         while (j < r) temp[k++] = a[j++];
-        for (int p = l; p < r; ++p) a[p] = temp[p];
+        for (int p = l; p < r; ++p) a[p] = temp[p]; // 把合并结果写回原区间
     };
     solve(solve, 0, n);
 }

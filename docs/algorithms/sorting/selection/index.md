@@ -25,22 +25,27 @@ description: 每轮选择最小值与交换次数，包含过程演示、C++17 �
 | 选 3 放到下标 2 | [1,2,3,5,4] |
 | 选 4 放到下标 3 | [1,2,3,4,5] |
 
+## 图解
+
+![选择排序图解：虚线框为每轮扫描的后缀范围，红色弧线把最小值换到前缀末尾，绿色为已就位元素](./images/selection-sort.drawio.png)
+
 ## C++17 实现模板
 
 函数接收整数数组并修改其结果。使用 int 下标的模板约定元素数不超过 INT_MAX。本专题的整数键按常见的 32 位 int 讨论；稳定性指比较相同键时，附属记录仍保持原相对顺序。
 
 ```cpp
-#include <utility>
+#include <utility>  // std::swap
 #include <vector>
 
 void selectionSort(std::vector<int>& a) {
     const int n = static_cast<int>(a.size());
-    for (int i = 0; i + 1 < n; ++i) {
-        int best = i;
+    // 不变量：第 i 轮开始时，[0, i) 已有序，且恰好是全数组最小的 i 个元素。
+    for (int i = 0; i + 1 < n; ++i) {            // 最后一个元素无需再选，因此只到 i + 1 < n
+        int best = i;                            // best：后缀 [i, n) 中最小值的下标，先假定 a[i] 最小
         for (int j = i + 1; j < n; ++j) {
-            if (a[j] < a[best]) best = j;
+            if (a[j] < a[best]) best = j;        // 严格小于才更新：相同值保留最先出现者
         }
-        if (best != i) std::swap(a[i], a[best]);
+        if (best != i) std::swap(a[i], a[best]); // 扫完整轮才交换一次；best == i 时不用换
     }
 }
 ```

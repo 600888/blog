@@ -25,33 +25,37 @@ description: 值域偏移、频次前缀和与稳定输出，包含过程演示�
 | 累计计数 | [2,3,3,4] |
 | 从右向左放入输出 | [-1,-1,0,2] |
 
+## 图解
+
+![计数排序图解：从输入到频次、累计计数再到输出三步，负数以最小值作偏移映射到计数桶](./images/counting-sort.drawio.png)
+
 ## C++17 实现模板
 
 函数接收整数数组并修改其结果。计数与输出下标使用 std::size_t。本专题的整数键按常见的 32 位 int 讨论；稳定性指比较相同键时，附属记录仍保持原相对顺序。
 
 ```cpp
-#include <algorithm>
-#include <cstddef>
-#include <stdexcept>
+#include <algorithm>   // std::minmax_element
+#include <cstddef>     // std::size_t
+#include <stdexcept>   // std::length_error
 #include <vector>
 
 void countingSort(std::vector<int>& a) {
     if (a.empty()) return;
-    const auto bounds = std::minmax_element(a.begin(), a.end());
-    const long long low = *bounds.first;
-    const long long range = static_cast<long long>(*bounds.second) - low + 1;
-    // 本示例的内存策略：值域超过两百万时拒绝分配。
+    const auto bounds = std::minmax_element(a.begin(), a.end()); // 一次扫描同时拿到最小值和最大值
+    const long long low = *bounds.first;                         // 最小值作偏移，让负数也映射到从 0 起的下标
+    const long long range = static_cast<long long>(*bounds.second) - low + 1; // 值域长度 K；先转 long long 再相减，避免差值溢出
+    // 资源策略：值域超过两百万就拒绝分配，防止内存爆炸；这不是计数排序的理论限制。
     if (range > 2'000'000) throw std::length_error("counting sort range too large");
     std::vector<std::size_t> count(static_cast<std::size_t>(range), 0);
-    for (int x : a) ++count[static_cast<std::size_t>(static_cast<long long>(x) - low)];
-    for (std::size_t i = 1; i < count.size(); ++i) count[i] += count[i - 1];
+    for (int x : a) ++count[static_cast<std::size_t>(static_cast<long long>(x) - low)]; // ① 统计每个值出现的次数
+    for (std::size_t i = 1; i < count.size(); ++i) count[i] += count[i - 1];            // ② 前缀和：count[t] = 值 ≤ 第 t 档的元素数
     std::vector<int> output(a.size());
-    for (std::size_t i = a.size(); i > 0; --i) {
+    for (std::size_t i = a.size(); i > 0; --i) {  // ③ 从右向左遍历：靠后的相同值占靠后的位置，保证稳定
         const int x = a[i - 1];
-        const std::size_t key = static_cast<std::size_t>(static_cast<long long>(x) - low);
-        output[--count[key]] = x;
+        const std::size_t key = static_cast<std::size_t>(static_cast<long long>(x) - low); // 偏移后的计数下标
+        output[--count[key]] = x;                 // 先自减再使用：得到该值当前应占的最后一个位置
     }
-    a.swap(output);
+    a.swap(output);                               // O(1) 交换写回，不做逐元素拷贝
 }
 ```
 

@@ -25,6 +25,10 @@ description: 有序前缀、搬移与二分定位，包含过程演示、C++17 �
 | 插入 1 | [1,3,4,5,2] |
 | 插入 2 | [1,2,3,4,5] |
 
+## 图解
+
+![插入排序图解：黄色为本轮 key，红色箭头为较大元素右移，虚线框为 key 的落点，绿色为有序前缀](./images/insertion-sort.drawio.png)
+
 ## C++17 实现模板
 
 函数接收整数数组并修改其结果。使用 int 下标的模板约定元素数不超过 INT_MAX。本专题的整数键按常见的 32 位 int 讨论；稳定性指比较相同键时，附属记录仍保持原相对顺序。
@@ -34,14 +38,15 @@ description: 有序前缀、搬移与二分定位，包含过程演示、C++17 �
 
 void insertionSort(std::vector<int>& a) {
     const int n = static_cast<int>(a.size());
-    for (int i = 1; i < n; ++i) {
-        const int key = a[i];
-        int j = i;
-        while (j > 0 && a[j - 1] > key) {
-            a[j] = a[j - 1];
+    // 不变量：第 i 轮开始时，[0, i) 已有序。
+    for (int i = 1; i < n; ++i) {              // 从第 2 个元素开始：单个元素天然有序
+        const int key = a[i];                  // 先暂存待插入元素，防止右移时被覆盖
+        int j = i;                             // j：key 的候选位置，从 i 起向左探测
+        while (j > 0 && a[j - 1] > key) {      // 严格大于才右移：相等元素停在 key 前面，保证稳定
+            a[j] = a[j - 1];                   // 比 key 大的元素整体向右挪一格
             --j;
         }
-        a[j] = key;
+        a[j] = key;                            // 把 key 写进空出来的位置
     }
 }
 ```
