@@ -15,6 +15,8 @@ npm run dev
 
 ```bash
 npm run typecheck
+npm run check:sidebar
+npm run test:sidebar
 npm run build
 npm run preview
 ```
@@ -37,6 +39,14 @@ rspress.config.ts       站点、导航及侧边栏配置
 ```
 
 新增文章时，在对应模块下创建 `.md` 或 `.mdx`，并在 `rspress.config.ts` 的 `sections[].articles` 中添加文件名和标题。页内目录根据二、三级标题生成，全文搜索在构建时更新。内部 Markdown 链接使用相对文件路径；React 组件使用 Rspress 的 `Link`，自动兼容站点前缀。
+
+算法题单分别由 `sliding-window-sidebar.ts`、`dynamic-programming-sidebar.ts`、`data-structures-sidebar.ts`、`graph-sidebar.ts`、`search-backtracking-sidebar.ts` 和 `sorting-sidebar.ts` 维护分类及题目顺序。新增题目时同步更新对应专题首页与学习路径。**同题出现在多个分类或专题时，必须复制完整正文到各自分类目录，并为每个侧边栏条目使用独立链接**，避免高亮与展开定位到另一分类。副本中的相对链接也应指向当前分类。
+
+`npm run check:sidebar` 检查各侧边栏中的重复链接、跨专题题目链接和缺失页面；`npm run test:sidebar` 验证检查器的重复链接判断。CI 在构建前运行这两项检查。原共享页面保留供已有直达链接使用，新的分类导航与题单使用独立副本。
+
+图论专题位于 `docs/algorithms/graph/`，包含 11 类、68 道不同题目和 70 个分类页面；搜索与回溯专题位于 `docs/algorithms/search-backtracking/`，包含 9 类、60 道不同题目和 61 个分类页面。数据结构题单包含 72 道不同题目和 73 个分类页面。
+
+十大排序位于 `docs/algorithms/sorting/`：冒泡、选择、插入、希尔、归并、快速、堆、计数、桶与基数排序各自一个专题，包含原理、过程演示、C++17 模板、复杂度与练习。共 29 道不同题目、44 个独立分类页面；正文分别放在 `sorting/bubble/`、`sorting/selection/` 等算法目录。学习路径与比较表分别位于 `sorting/learning-path.md` 和 `sorting/index.md`。
 
 ## GitHub Pages 部署
 

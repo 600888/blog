@@ -28,4 +28,8 @@ comments: false
 
 ## 后续方向
 
-在线性结构之后，可以练习[数据结构题单](./data-structures/index.md)、[滑动窗口专题](./sliding-window/index.md)和[动态规划专题](./dynamic-programming/index.md)。图论、查找与排序、递归和贪心等笔记将逐步补充。
+在线性结构之后，可以练习[数据结构题单](./data-structures/index.md)、[滑动窗口专题](./sliding-window/index.md)、[动态规划专题](./dynamic-programming/index.md)、[图论专题](./graph/index.md)、[搜索与回溯专题](./search-backtracking/index.md)和[十大排序题单](./sorting/index.md)。
+
+图论专题从建图、遍历和连通性出发，逐步学习最短路径、生成树及进阶图结构，可参考[图论建议学习路径](./graph/learning-path.md)。搜索与回溯专题按子集、组合、排列、分割、网格路径和约束满足等模型组织，重点练习状态恢复、去重与剪枝，可参考[搜索与回溯建议学习路径](./search-backtracking/learning-path.md)。
+
+十大排序按算法分别组织冒泡、选择、插入、希尔、归并、快速、堆、计数、桶与基数排序，配有过程演示、C++17 模板及性质速查。可沿[排序建议学习路径](./sorting/learning-path.md)，从有序前缀与交换开始，再学习分治、堆和非比较排序。查找、贪心等笔记将逐步补充。

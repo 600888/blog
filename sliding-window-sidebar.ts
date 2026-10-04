@@ -62,7 +62,7 @@ export const slidingWindowSidebar: SidebarEntry[] = [
         problem(904, '水果成篮', 'longest/frequency'),
       ]),
       group('数值与差值约束', [
-        problem(209, '长度最小的子数组', 'shortest'),
+        problem(209, '长度最小的子数组', 'longest/numeric'),
         problem(1438, '绝对差不超过限制的最长连续子数组', 'longest/numeric'),
         problem(2401, '最长优雅子数组', 'longest/numeric'),
         problem(2009, '使数组连续的最少操作数', 'longest/numeric'),
@@ -86,7 +86,7 @@ export const slidingWindowSidebar: SidebarEntry[] = [
       ]),
       group('恰好 K 与至多 K', [
         problem(992, 'K 个不同整数的子数组', 'counting/exact'),
-        problem(1248, '统计「优美子数组」', 'counting/product-sum'),
+        problem(1248, '统计「优美子数组」', 'counting/exact'),
         problem(795, '区间子数组个数', 'counting/exact'),
       ]),
       group('越长或越短越合法', [

@@ -13,10 +13,6 @@ const problem = (id: number, title: string, folder: string): SidebarEntry => ({
   link: `${base}/${folder}/${id}`,
 });
 
-const existing = (id: number, title: string, link: string): SidebarEntry => ({
-  text: `${id}. ${title}`,
-  link,
-});
 
 const group = (text: string, items: SidebarEntry[]): SidebarEntry => ({
   text,
@@ -35,7 +31,7 @@ export const dataStructuresSidebar: SidebarEntry[] = [
       problem(238, '除自身以外数组的乘积', 'array-hash'),
       problem(303, '区域和检索 - 数组不可变', 'array-hash'),
       problem(304, '二维区域和检索 - 矩阵不可变', 'array-hash'),
-      existing(560, '和为 K 的子数组', '/algorithms/sliding-window/counting/product-sum/560'),
+      problem(560, '和为 K 的子数组', 'array-hash'),
       problem(1094, '拼车', 'array-hash'),
     ]),
     group('二、链表', [
@@ -60,7 +56,7 @@ export const dataStructuresSidebar: SidebarEntry[] = [
         problem(739, '每日温度', 'stack-queue'),
         problem(84, '柱状图中最大的矩形', 'stack-queue'),
         problem(402, '移掉 K 位数字', 'stack-queue'),
-        existing(239, '滑动窗口最大值', '/algorithms/sliding-window/advanced/239'),
+        problem(239, '滑动窗口最大值', 'stack-queue'),
       ]),
     ]),
     group('四、二叉树与二叉搜索树', [
@@ -89,7 +85,7 @@ export const dataStructuresSidebar: SidebarEntry[] = [
       problem(23, '合并 K 个升序链表', 'heap'),
       problem(295, '数据流的中位数', 'heap'),
       problem(373, '查找和最小的 K 对数字', 'heap'),
-      existing(480, '滑动窗口中位数', '/algorithms/sliding-window/advanced/480'),
+      problem(480, '滑动窗口中位数', 'heap'),
     ]),
     group('六、字典树 Trie', [
       problem(208, '实现 Trie (前缀树)', 'trie'),
@@ -112,14 +108,14 @@ export const dataStructuresSidebar: SidebarEntry[] = [
       problem(493, '翻转对', 'fenwick'),
     ]),
     group('九、线段树', [
-      existing(307, '区域和检索 - 数组可修改', `${base}/fenwick/307`),
+      problem(307, '区域和检索 - 数组可修改', 'segment-tree'),
       problem(732, '我的日程安排表 III', 'segment-tree'),
       problem(699, '掉落的方块', 'segment-tree'),
       problem(2569, '更新数组后处理求和查询', 'segment-tree'),
       problem(715, 'Range 模块', 'segment-tree'),
     ]),
     group('十、有序集合与区间维护', [
-      existing(220, '存在重复元素 III', '/algorithms/sliding-window/two-pointers/same-direction/220'),
+      problem(220, '存在重复元素 III', 'ordered-set'),
       problem(352, '将数据流变为多个不相交区间', 'ordered-set'),
       problem(729, '我的日程安排表 I', 'ordered-set'),
       problem(855, '考场就座', 'ordered-set'),

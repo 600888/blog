@@ -7,7 +7,9 @@
     "dev": "rspress dev",
     "build": "rspress build",
     "preview": "rspress preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check:sidebar": "node scripts/check-sidebar.mjs",
+    "test:sidebar": "node --test scripts/check-sidebar.test.mjs"
   },
   "engines": { "node": ">=22.12.0" },
   "devDependencies": {

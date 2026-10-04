@@ -2,6 +2,9 @@ import { defineConfig } from '@rspress/core';
 import { slidingWindowSidebar } from './sliding-window-sidebar';
 import { dynamicProgrammingSidebar } from './dynamic-programming-sidebar';
 import { dataStructuresSidebar } from './data-structures-sidebar';
+import { graphSidebar } from './graph-sidebar';
+import { searchBacktrackingSidebar } from './search-backtracking-sidebar';
+import { sortingSidebar } from './sorting-sidebar';
 
 const sections = [
   { text: '数据结构与算法', path: 'algorithms', articles: [['complexity', '时间与空间复杂度'], ['linear-structures', '数组、链表、栈与队列']] },
@@ -41,7 +44,7 @@ export default defineConfig({
           { sectionHeaderText: text },
           { text: '模块导读', link: `/${path}/` },
           { text: '基础笔记', collapsible: true, collapsed: false, items: articles.map(([slug, label]) => ({ text: label, link: `/${path}/${slug}` })) },
-          ...(path === 'algorithms' ? [...slidingWindowSidebar, ...dynamicProgrammingSidebar, ...dataStructuresSidebar] : []),
+          ...(path === 'algorithms' ? [...slidingWindowSidebar, ...dynamicProgrammingSidebar, ...dataStructuresSidebar, ...graphSidebar, ...searchBacktrackingSidebar, ...sortingSidebar] : []),
         ],
       ])),
     },

@@ -31,6 +31,10 @@ jobs:
         run: npm ci
       - name: Check types
         run: npm run typecheck
+      - name: Check sidebar links
+        run: npm run check:sidebar
+      - name: Test sidebar checks
+        run: npm run test:sidebar
       - name: Build Rspress
         run: npm run build
       - name: Upload site
