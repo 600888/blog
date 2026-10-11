@@ -1,0 +1,165 @@
+---
+title: 发布与集成
+description: dlt698 的预编译发布包设计：10 个平台的组合、静态与动态库的分离约定、校验和体系，以及单一库目标的集成方式。
+---
+
+# 发布与集成
+
+## 单一库目标
+
+对外只暴露一个 CMake 目标：
+
+```cmake
+find_package(dlt698 1.0 CONFIG REQUIRED)
+target_link_libraries(your_app PRIVATE dlt698::dlt698)
+```
+
+| CMake 目标 | 内容 |
+| --- | --- |
+| `dlt698::dlt698` | 编解码、内存通道、会话、对象服务，以及启用时的 TCP / 串口和托管 Server / Client |
+
+历史拆分过的 `dlt698::core`、`dlt698::session`、`dlt698::service` 保留为**统一库的兼容别名**，启用传输时也提供 `dlt698::transport` 和 `dlt698::app` 别名——但**都不生成独立库**。
+
+这个决定解决了一个实际问题。协议实现的头文件天然互相引用：
+
+- `link/frame.hpp` 需要 `codec` 的 `ByteView`
+- `apdu/apdu.hpp` 需要 `link` 的 `Frame`
+- `service/object.hpp` 需要 `apdu` 的 `RecordResult`
+- `app/server.hpp` 需要以上全部
+
+强行拆成多个库，就会引入传递依赖、循环依赖，以及一堆 CMake 的链接顺序处理。合并成单一库反而更简单，也避免了使用者猜「我该链接哪个目标」。
+
+## 发布矩阵
+
+GitHub Releases 按平台、架构和库类型发布 **10 个压缩包**：
+
+| 平台 | 架构 / 工具链 | 产物 | 格式 |
+| --- | --- | --- | --- |
+| Linux | x64、ARM64 / GCC | 静态 `.a`、动态 `.so` | `.tar.gz` |
+| Windows | x64 / MSVC、Release `/MD` | 静态 `.lib`、动态 `.dll` + 导入 `.lib` | `.zip` |
+| macOS | Intel x64、Apple Silicon ARM64 / AppleClang | 静态 `.a`、动态 `.dylib` | `.tar.gz` |
+
+文件名示例：
+
+```text
+dlt698-1.0.0-windows-x64-msvc-shared.zip
+```
+
+Python wheel 和 sdist 通过**独立任务**发布到 PyPI。C++ 消费方可以直接下载对应包，也可以按 [本地打包命令](https://github.com/600888/dlt698/blob/main/docs/releasing.md) 自行生成。
+
+### 每个包的内容
+
+每个压缩包包含：
+
+```text
+include/          公开头文件目录（含生成的导出头）
+lib/ 或 bin/      静态库或动态库
+VERSION
+README.md
+LICENSE            项目许可证
+THIRD-PARTY       Asio 许可证
+dlt698-config.cmake  CMake 配置
+```
+
+**不含测试和示例程序**。测试和示例对使用方没有价值，却会让包体积翻几倍。
+
+## 三条集成约定
+
+这些约定看起来是细节，但每一条都会让接入失败：
+
+### 1. 静态与动态包有独立安装前缀
+
+**不能混合覆盖。**
+
+原因是同名文件会互相覆盖。用静态包装一次再用动态包装一次，会得到一个混合的目录——头文件可能是新的，库是旧的，或者反过来。这种状态下的链接错误会非常莫名其妙。
+
+### 2. Unix 解压要保留符号链接
+
+动态库包的 tar 里通常有：
+
+```text
+libdlt698.so      →  libdlt698.so.1.0.0
+libdlt698.so.1    →  libdlt698.so.1.0.0
+```
+
+用某些解压工具会**丢掉符号链接**，只留下实体文件。虽然能编译，但 `dlopen` 和运行时链接会出问题。解压时必须用保持链接的方式（`tar xzf` 默认保持，某些 GUI 工具不保持）。
+
+### 3. ABI 不保证跨工具链兼容
+
+| 系统 | 需要 |
+| --- | --- |
+| Windows | 兼容的 MSVC 工具链和运行库；动态包的 `bin/` 中 DLL 需放在程序旁边或加入 `PATH` |
+| Linux | 兼容构建环境的 glibc、libstdc++ |
+
+**各系统的 C++ ABI 不保证跨工具链兼容。** 用 GCC 11 编的库和 GCC 13 编的程序，标准库容器布局可能不同，链接时不会报错，运行时才会崩。
+
+这不是库的缺陷，是 C++ ABI 现实。预编译包的价值是「省去自己编译」，不是「跨一切环境通用」。
+
+## 接入步骤
+
+```sh
+# 1. 解压，保持符号链接
+tar xzf dlt698-1.0.0-linux-arm64-gcc-shared.tar.gz
+
+# 2. 把包根目录加入搜索路径
+export CMAKE_PREFIX_PATH=/opt/dlt698:$CMAKE_PREFIX_PATH
+
+# 3. 在 CMakeLists.txt 里
+find_package(dlt698 1.0 CONFIG REQUIRED)
+target_link_libraries(your_app PRIVATE dlt698::dlt698)
+```
+
+Windows 需要把安装目录的 DLL 放在程序旁边或加入 `PATH`。
+
+## 校验和体系
+
+每个发布提供三样东西：
+
+| 文件 | 用途 |
+| --- | --- |
+| 单包 `.sha256` | 校验单个压缩包 |
+| 发布清单 | 列出本次发布的全部产物 |
+| `SHA256SUMS` | 总校验文件 |
+
+**本地打包也生成独立的 `.sha256`**。这一点很重要——本地打包的产物同样可能被传递，如果只有 CI 发布的包有校验和，本地产物的可信度就无法验证。
+
+## 版本号单一来源
+
+版本号存在根目录的 `VERSION` 文件里：
+
+```text
+1.0.0
+```
+
+CMake 通过 `file(STRINGS ...)` 读取它，Python 的 `pyproject.toml` 用 `dynamic = ["version"]` 从同一处取值。
+
+**只有一处需要修改。** 多处维护版本号是迟早会出错的——改了一处忘了另一处，发布出来的包版本对不上，或者 wheel 版本和库版本不一致。
+
+## 中文头文件的跨平台编译
+
+`AGENTS.md` 里有一条硬性要求：
+
+> 包含中文注释的公开头文件必须能被安装包调用方正确编译，MSVC 目标需传递 `/utf-8` 编译选项。
+
+MSVC 默认不把源文件当 UTF-8 处理。不传 `/utf-8`，中文注释会导致：
+
+- **Linux 上编译正常，Windows 上编译报错**——错误信息指向某个宏或者字符，而不是编码
+- 更糟的情况是某些字符被当成终止符，产生难以定位的语法错误
+
+这类问题只在跨平台时暴露，而跨平台恰好是发布包的核心价值。所以它被写成了明确的构建要求。
+
+## 版本兼容性
+
+| 兼容维度 | 约定 |
+| --- | --- |
+| 同一 major | 保持源码兼容 |
+| 跨 major | 需要重新编译 |
+| 跨工具链 | 不保证 ABI 兼容 |
+| 跨操作系统 | 不通用，平台相关包分别发布 |
+
+源码兼容的意思是升级 minor 版本不需要改代码。依赖方只需要重新下载包、重新链接。
+
+## 相关
+
+- [构建与测试](./build-and-test.mdx) — 本地构建、测试组织、包消费测试
+- [Python 绑定](./python-bindings.mdx) — PyPI 分发与绑定同步机制

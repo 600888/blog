@@ -168,7 +168,7 @@ description: 从定长窗口到不定长收缩、计数问题、字符串匹配�
 
 | 题目 | 练习重点 |
 | --- | --- |
-| [219. 存在重复元素 II](./two-pointers/same-direction/219.md) | 下标距离不超过 k 的重复检测 |
+| [219. 存在重复元素 II](./two-pointers/same-direction/219.md) | 转化为最小重复距离，收缩窗口求最小 |
 | [220. 存在重复元素 III](./two-pointers/same-direction/220.md) | 固定宽度桶配合邻近窗口，或有序集合 |
 
 #### 相向双指针

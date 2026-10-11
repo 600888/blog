@@ -1,0 +1,220 @@
+---
+title: Python 绑定
+description: dlt698 的 Python 绑定：pybind11 直连 C++ 内核、asyncio 桥接而不包装同步线程，以及 api-map.json 保证两端接口同步的机制。
+---
+
+# Python 绑定
+
+Python 包**直接绑定同一提交的 C++17 内核**，不是重新实现一套协议。
+
+```text
+Python 代码 → pybind11 → C++ 内核 → 协议栈
+```
+
+**不存在两份协议实现。** 这意味着 C++ 侧的修复、修复的边界情况、通过测试的逻辑，Python 侧自动获得。
+
+## 为什么用 pybind11 而不是 ctypes
+
+| 方案 | 问题 |
+| --- | --- |
+| ctypes | 没有类型转换，C++ 的 `Result<T>` 和 `std::variant` 无法表达 |
+| ctypes + 手写封装 | 封装层本身要维护，等于写两遍 |
+| pybind11 | C++ 模板直接映射到 Python 类型 |
+
+`Result<T>` 这种类型在 Python 里映射成 `(值, 错误)` 的组合，`std::variant<DataType, ...>` 映射成 Python 的联合类型或包装对象。**绑定层尽量薄**，逻辑都在 C++ 侧。
+
+构建后端固定为 **scikit-build-core 0.11.6**，pybind11 使用仓库内的 3.1.0——版本锁定，避免不同环境拉不同版本导致行为不一致。
+
+## 版本与身份核对
+
+```python
+from dlt698 import Client, Data, Oad, Server
+
+frequency = Oad(oi=0x200F, attribute=2)
+with Server() as server:
+    server.set(frequency, Data.uint16(5000))
+    server.start_tcp("127.0.0.1", 0)          # 端口 0 = 自动分配
+    with Client() as client:
+        client.connect_tcp("127.0.0.1", server.local_port)
+        result = client.get(frequency)
+        print(result.require_data().as_uint16())   # 原始值 5000
+```
+
+这段代码体现了几个设计选择：
+
+**`server.start_tcp("127.0.0.1", 0)` 用端口 0** —— 让操作系统分配端口，然后通过 `server.local_port` 读回来。这让示例和测试不需要固定端口，避免并行测试时端口冲突。
+
+**`require_data()` 显式取值。** 规约里的响应可能是 Data 也可能是 DAR，Python 侧不自动隐式转换——要什么类型就调什么方法，`require_data()` 失败时抛 `Dlt698Error`。
+
+**注释提醒「原始值 5000，单位/倍率查标准目录」** —— 返回的是协议原始值，要拿工程值得用 `dlt698.standard`。这个行为和 C++ 侧一致：**库不猜你的意图**。
+
+## 版本单一来源
+
+Python 包的版本来自**根目录的 `VERSION` 文件**，不是 `pyproject.toml` 里写的：
+
+```toml
+[project]
+dynamic = ["version"]
+```
+
+导入时还会核对安装 metadata、包装层和原生扩展的**构建身份是否一致**。
+
+这个检查解决一个真实问题：如果一个环境里装了从不同提交构建的 wheel 和 sdist，或者替换过原生 `.so`，那么「Python 代码」和「C++ 内核」可能是两个版本。行为会出现无法解释的偏差。
+
+导入时核对身份，能立刻发现这种混装。
+
+## asyncio 桥接：不包装同步线程
+
+这是 Python 绑定里最值得说的设计决定。
+
+```python
+"""asyncio 桥接原生 Session 异步完成队列，不包装同步客户端线程。"""
+```
+
+最省事的做法是：把 C++ 的同步 `Client` 丢到一个工作线程里，用 `run_in_executor` 调用。这样代码量很小，但有三个问题：
+
+| 问题 | 说明 |
+| --- | --- |
+| 多一层线程 | 同步客户端内部已经有线程，再套一层 |
+| 取消不干净 | `run_in_executor` 里运行的任务无法真正取消 |
+| 阻塞事件循环 | 线程池耗尽时整个 loop 卡住 |
+
+dlt698 的做法是**直接驱动原生异步 `Session`**：
+
+```python
+class AsyncClient:
+    """在所属事件循环使用；取消交给原生会话，loop 关闭前必须 aclose。
+
+    每次原生 pump 最多 1ms，不创建额外工作线程。单在途事务和不重试约定沿用 C++。
+    """
+```
+
+要点：
+
+**「不创建额外工作线程」** —— Python 侧通过定时调用原生的 pump（每次最多 1ms）把完成队列桥接到 asyncio。线程由 C++ 侧管理，Python 不加线程。
+
+**「取消交给原生会话」** —— 取消操作传给 C++ 的 `Session`，由原生状态机处理，不是 Python 侧强行丢弃 Future。这样事务状态在 C++ 侧保持一致。
+
+**「单在途事务和不重试约定沿用 C++」** —— Python 端**不引入新的语义**。C++ 侧单在途，Python 侧也单在途；C++ 侧不自动重试，Python 侧也不自动重试。
+
+最后这条是原则性的：**绑定层不应该有内核没有的行为**。否则会出现「Python 侧能跑，C++ 侧跑不了」的诡异问题，而且两份语义要分别维护。
+
+**`aclose()` 是强制的** —— 必须在 event loop 关闭前调用。异步客户端持有原生会话，不关闭就释放会让挂起的回调投递不到。
+
+## 接口层次
+
+Python 包按层次暴露，不是把 C++ API 平铺：
+
+| 入口 | 定位 |
+| --- | --- |
+| `dlt698.Client / Server` | 普通入口，覆盖日常使用 |
+| `dlt698.AsyncClient / AsyncServer` | asyncio 入口 |
+| `dlt698.model` | Data 标签、标量、描述符 |
+| `dlt698.codec / protocol` | 完整消息和编解码 |
+| `dlt698.standard` | 标准对象、OAD 模板、工程量 |
+| `dlt698.expert` | 显式驱动 Engine / Endpoint、provider、自定义扩展 |
+
+**普通入口优先，完整消息和扩展点放在分层模块。** 这和 C++ 侧的 `app` 层理念一致：让简单的事情简单，需要时又有完整的控制力。
+
+`dlt698.expert` 是最底层的入口，由用户显式驱动 Engine 和 Endpoint，适合需要自定义 provider、MemoryRecords、REPORT / Follow / ACD、ProxyRouter、安全后端等扩展能力的场景。
+
+### 扩展点必须及时返回
+
+Python 扩展点的硬约束：
+
+> 由同一业务线程持续 `poll()`；Python 扩展点必须及时返回，不能重入或阻塞等待同一运行时。
+
+和 C++ 侧安全后端「在 Session 串行执行器内调用，必须有界且不得阻塞」是同一个约束。
+
+**Python 的问题更严重**——在 `poll()` 里阻塞不仅会卡住会话，还会因为 GIL 持有而影响整个解释器。所以扩展点的实现必须快速返回，耗时操作要在外部做。
+
+## api-map.json：接口同步的机制
+
+这是整个绑定里最巧妙的设计。
+
+```json
+{
+  "schema": 1,
+  "headers": {
+    "cpp/include/dlt698/codec/data_codec.hpp": "73ae5389915ee83d691d5e33ecdf5b6c1b0664a90d48bcba3c6ce12512e15646",
+    // ...
+  },
+  "entries": [ /* 每个 C++ 类型到 Python 入口的映射 */ ],
+  "symbols": [ /* 暂未开放的低层符号及原因 */ ]
+}
+```
+
+### 三部分各管一件事
+
+| 字段 | 作用 |
+| --- | --- |
+| `headers` | 每个公开头文件的 **SHA-256** |
+| `entries` | C++ 类型 → Python 入口的映射，标注状态和阶段 |
+| `symbols` | **暂未绑定**的符号及原因 |
+
+`headers` 的哈希记录解决了**绑定不同步**的问题。
+
+C++ 头文件改了，Python 绑定可能忘了跟着改——这种不一致在编译期不一定报错，表现是「Python 侧的某个参数类型不对，但没崩溃」。
+
+有了哈希，CI 可以检查每个头文件是否都登记了对应的绑定映射。**头文件改了但绑定没更新，会被发现。**
+
+### 显式记录「没绑定」
+
+`symbols` 里记录了哪些符号**没有**绑定，以及原因：
+
+```json
+{
+  "cpp": "dlt698::ByteView",
+  "kind": "CLASS_DECL",
+  "status": "deferred",
+  "reason": "Low-level surface not exported; use the mapped application/Engine API."
+}
+```
+
+这是个好实践。**没绑定的东西也要写下来。**
+
+如果只是不绑定，使用者会以为是遗漏、是 bug；如果明确记录了原因和替代方案，它就是一个有意的设计决策。
+
+低层接口（如 `ByteView`）不导出是有道理的——它直接暴露了内存所有权和生命周期约定，跨语言边界传递会引入 Python 侧无法保证的安全性。应该用映射好的 application / Engine API。
+
+## 验证与分发
+
+**本地验证和外部验收范围**记录在 `python/verification.md`——哪些已验证、哪些待实机验证，分开写清楚。
+
+分发渠道：
+
+| 产物 | 渠道 |
+| --- | --- |
+| wheel + sdist | PyPI |
+| C++ SDK 压缩包 | GitHub Releases（10 个包） |
+
+**包没有运行时第三方 Python 依赖。** 所有依赖在构建期解决，用户 `pip install` 之后不需要再装别的东西。
+
+源码包自带内核和需要的第三方头文件，**没有 Git 也能重建**。这对发行版打包者和离线环境很重要。
+
+## 开发环境
+
+```sh
+python -m venv .venv
+.venv/Scripts/python -m pip install -e ".[dev]"
+.venv/Scripts/python -m pytest python/tests
+```
+
+需要 CPython **3.11–3.14**、C++17 编译器和 CMake。Windows 使用 x64 MSVC Release `/MD`。
+
+Python 版本范围下界是 3.11，上界 3.15——`pyproject.toml` 里写的是 `requires-python = ">=3.11,<3.15"`。绑定用的类型注解语法需要 3.11+，而上界留给未来的版本验证窗口。
+
+## C++ 与 Python 的分工
+
+| 关注点 | C++ | Python |
+| --- | --- | --- |
+| 协议实现 | ✅ 唯一实现 | 绑定 |
+| 性能敏感路径 | ✅ | 经由绑定 |
+| 快速脚本、测试编排 | | ✅ |
+| asyncio 集成 | | ✅ 桥接原生异步 |
+| 自定义扩展 | ✅ provider | ✅ expert 入口 |
+| 静态类型检查 | ✅ 编译器 | `py.typed` + mypy |
+
+Python 包标记了 `py.typed`，类型注解对类型检查器可见。配合 mypy 配置（`python_version = "3.11"`），Python 侧也能获得静态检查。
+
+**工具链也是分层的**：ruff 管格式和 lint，mypy 管类型，pytest 管测试，CMake 管 C++ 构建。每种工具只管自己擅长的部分。

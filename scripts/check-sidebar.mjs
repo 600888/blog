@@ -18,6 +18,8 @@ export function readSiteConfig() {
     }).outputText;
     function localRequire(specifier) {
       if (specifier === '@rspress/core') return { defineConfig: config => config };
+      // 插件只需存在即可通过校验，配置里的 plugins 不参与侧边栏检查。
+      if (specifier === 'rspress-plugin-mermaid') return { default: () => ({}) };
       if (!specifier.startsWith('.')) throw new Error(`Unsupported configuration import: ${specifier}`);
       const resolved = path.resolve(path.dirname(file), specifier + '.ts');
       if (!resolved.startsWith(projectRoot + path.sep)) throw new Error(`Import outside project: ${specifier}`);
